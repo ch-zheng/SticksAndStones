@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Sticks And Stones</string>
+    <!-- Main Menu activity -->
+    <string name="new_game">New Game</string>
+    <string name="resume_game">Resume Game</string>
+    <string name="settings">Settings</string>
+    <!-- New Game activity -->
+    <string name="title_activity_newgame">Create New Game</string>
+    <string name="add_player">Add Player</string>
+    <string name="create_game">Create Game</string>
+    <!-- Game activity -->
+    <string name="round">Round</string>
+    <string name="prompt">Prompt</string>
+    <string name="name">Name</string>
+    <string name="entry">Entry</string>
+    <string name="vote">Vote</string>
+    <string name="judge">Judge</string>
+    <string name="timer">Time Wasted</string>
+</resources>
