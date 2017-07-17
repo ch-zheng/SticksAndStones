@@ -21,9 +21,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.button_resumegame:
                 //TODO: Resume existing game
-                break;
-            case R.id.button_settings:
-                //TODO: Goto 'settings menu'
+                startActivity(new Intent(this, GameActivity.class)); //DEBUGGING
                 break;
         }
     }
