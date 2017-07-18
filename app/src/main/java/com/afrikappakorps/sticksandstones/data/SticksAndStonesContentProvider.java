@@ -69,8 +69,17 @@ public class SticksAndStonesContentProvider extends ContentProvider {
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
         final SQLiteDatabase db = mDbHelper.getReadableDatabase();
         int match = sUriMatcher.match(uri);
-        Uri returnedUri;
 
+        switch (match) {
+            case PLAYERS: {
+                db.insert(SticksAndStonesContract.PlayerEntry.TABLE_NAME,
+                        null,
+                        values);
+                return uri;
+            }
+            default:
+                throw new UnsupportedOperationException("lul noob");
+        }
 
     }
 
