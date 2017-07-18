@@ -31,6 +31,16 @@ public class SticksAndStonesContentProvider extends ContentProvider {
         return true;
     }
 
+    /**
+     * Queries the player database
+     *
+     * @param uri           uri of where to query, should be players
+     * @param projection    columns which the data returned by the query will contain
+     * @param selection     something which determines what will be queried (like: "_id=?")
+     * @param selectionArgs an array of values which satisfy the selection
+     * @param sortOrder     order in which results are sorted. ex: COLUMN_SCORE + " DESC" or COLUMN_SCORE + " ASC"
+     * @return              Cursor containing the data specified
+     */
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection,
@@ -58,6 +68,13 @@ public class SticksAndStonesContentProvider extends ContentProvider {
         return retCursor;
     }
 
+    /**
+     * Inserts data into the database
+     *
+     * @param uri       should be the players one
+     * @param values    ContentValues object containing data for the insert
+     * @return          Uri of the table bcs. I'm lazy
+     */
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
@@ -78,6 +95,14 @@ public class SticksAndStonesContentProvider extends ContentProvider {
         return uri;
     }
 
+    /**
+     * Deletes stuff from the database
+     *
+     * @param uri           Uri lul
+     * @param selection     something which determines what will be deleted (like: "_id=?")
+     * @param selectionArgs selectionArgs an array of values which satisfy the selection
+     * @return              returns int representing how many rows were deleted
+     */
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
