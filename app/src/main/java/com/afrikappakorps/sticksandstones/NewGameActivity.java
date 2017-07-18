@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.EditText;
 
@@ -24,7 +25,6 @@ public class NewGameActivity extends AppCompatActivity
 
     private SticksAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private int mPosition = RecyclerView.NO_POSITION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +42,29 @@ public class NewGameActivity extends AppCompatActivity
         mAdapter = new SticksAdapter(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            // Called when a user swipes left or right on a ViewHolder
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+
+                // Here is where you'll implement swipe to delete
+                int id = (int) viewHolder.itemView.getTag();
+
+                Uri uri = SticksAndStonesContract.PlayerEntry.CONTENT_URI;
+
+                String whereClause = "_id=?";
+                String[] whereArgs = {String.valueOf(id)};
+
+                getContentResolver().delete(uri, whereClause, whereArgs);
+                //getSupportLoaderManager().restartLoader(0, null, NewGameActivity.this);
+            }
+        }).attachToRecyclerView(mRecyclerView);
 
         //Loader
         getLoaderManager().initLoader(0, null, this);

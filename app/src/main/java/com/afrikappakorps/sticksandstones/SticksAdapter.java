@@ -38,6 +38,7 @@ public class SticksAdapter extends RecyclerView.Adapter<SticksAdapter.SticksAdap
     public void onBindViewHolder(SticksAdapterViewHolder holder, int position) {
         if (mPlayerData.moveToPosition(position)) {
             holder.playerName.setText(mPlayerData.getString(mPlayerData.getColumnIndex(SticksAndStonesContract.PlayerEntry.COLUMN_PLAYER_NAME)));
+            holder.itemView.setTag(mPlayerData.getInt(mPlayerData.getColumnIndex(SticksAndStonesContract.PlayerEntry._ID)));
         }
     }
 

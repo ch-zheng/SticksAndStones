@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 
 public class SticksAndStonesContentProvider extends ContentProvider {
     public static final int PLAYERS = 100;
+    public static final int A_PLAYER = 101;
 
     private SticksAndStonesDbHelper mDbHelper;
 
@@ -32,6 +33,7 @@ public class SticksAndStonesContentProvider extends ContentProvider {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         uriMatcher.addURI(SticksAndStonesContract.AUTHORITY, SticksAndStonesContract.PATH_PLAYERS, PLAYERS);
+        uriMatcher.addURI(SticksAndStonesContract.AUTHORITY, SticksAndStonesContract.PATH_PLAYERS + "/#", A_PLAYER);
 
         return uriMatcher;
     }
@@ -67,7 +69,7 @@ public class SticksAndStonesContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        final SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int match = sUriMatcher.match(uri);
 
         switch (match) {
@@ -86,7 +88,27 @@ public class SticksAndStonesContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+
+        int numberOfRowsDeleted;
+
+        switch (match) {
+            case PLAYERS:
+                numberOfRowsDeleted = db.delete(SticksAndStonesContract.PlayerEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
+                break;
+
+            default:
+                throw new UnsupportedOperationException("lul");
+        }
+
+        if (numberOfRowsDeleted > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return numberOfRowsDeleted;
     }
 
     @Override
