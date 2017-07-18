@@ -2,7 +2,6 @@ package com.afrikappakorps.sticksandstones;
 
 import android.app.DialogFragment;
 import android.app.LoaderManager;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -21,50 +20,43 @@ import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract;
 
 public class NewGameActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<Cursor>,
-    AddUserDialogFragment.AddUserDialogListener {
+    AddPlayerDialogFragment.AddUserDialogListener {
 
-    private SticksAdapter mAdapter;
-    private RecyclerView mRecyclerView;
+    private AddPlayersAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newgame);
 
-        //Setup toolbar
+        //Toolbar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_newgame));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //Recyclerview setup
-        mRecyclerView = (RecyclerView) findViewById(R.id.list_addplayers);
+        //RecyclerView setup
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list_addplayers);
         LinearLayoutManager linearLayoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mAdapter = new SticksAdapter(this);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+        mAdapter = new AddPlayersAdapter(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(mAdapter);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        //Swipe-to-delete
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;
             }
 
-            // Called when a user swipes left or right on a ViewHolder
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-
-                // Here is where you'll implement swipe to delete
                 int id = (int) viewHolder.itemView.getTag();
-
                 Uri uri = SticksAndStonesContract.PlayerEntry.CONTENT_URI;
-
                 String whereClause = "_id=?";
                 String[] whereArgs = {String.valueOf(id)};
-
                 getContentResolver().delete(uri, whereClause, whereArgs);
-                //getSupportLoaderManager().restartLoader(0, null, NewGameActivity.this);
             }
-        }).attachToRecyclerView(mRecyclerView);
+        }).attachToRecyclerView(recyclerView);
 
         //Loader
         getLoaderManager().initLoader(0, null, this);
@@ -73,7 +65,7 @@ public class NewGameActivity extends AppCompatActivity
     public void onButtonClick(View view) {
         switch (view.getId()) {
             case R.id.button_addplayer:
-                new AddUserDialogFragment().show(getFragmentManager(), "adduser");
+                new AddPlayerDialogFragment().show(getFragmentManager(), "adduser");
                 break;
             case R.id.button_creategame:
                 //TODO: Create new game
@@ -81,7 +73,7 @@ public class NewGameActivity extends AppCompatActivity
         }
     }
 
-    //Dialog method
+    @Override
     public void onAddUserDialogPositiveClick(DialogFragment dialog, EditText editor) {
         ContentValues values = new ContentValues();
         values.put(SticksAndStonesContract.PlayerEntry.COLUMN_PLAYER_NAME, editor.getText().toString());
@@ -90,15 +82,18 @@ public class NewGameActivity extends AppCompatActivity
     }
 
     //LOADER CALLBACK METHODS
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(this, SticksAndStonesContract.PlayerEntry.CONTENT_URI, null, null, null, null);
     }
 
+    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
         mAdapter.notifyDataSetChanged();
     }
 
+    @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
         mAdapter.notifyDataSetChanged();

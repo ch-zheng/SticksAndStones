@@ -4,18 +4,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
     <TextView
+        android:id="@+id/player_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/player_name"
         style="@style/TextAppearance.AppCompat.Large"
         android:padding="16dp"
         tools:text="Bob Billington"/>
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:background="#ffffff"/>
+        android:background="#FFFFFF"/>
 </LinearLayout>

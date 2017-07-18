@@ -10,32 +10,25 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-/**
- * Created by hangsun on 7/17/17.
- */
-
 public class SticksAndStonesContentProvider extends ContentProvider {
     public static final int PLAYERS = 100;
     public static final int A_PLAYER = 101;
 
     private SticksAndStonesDbHelper mDbHelper;
-
     private static final UriMatcher sUriMatcher = buildUriMatcher();
+
+    public static UriMatcher buildUriMatcher() {
+        UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        uriMatcher.addURI(SticksAndStonesContract.AUTHORITY, SticksAndStonesContract.PATH_PLAYERS, PLAYERS);
+        uriMatcher.addURI(SticksAndStonesContract.AUTHORITY, SticksAndStonesContract.PATH_PLAYERS + "/#", A_PLAYER);
+        return uriMatcher;
+    }
 
     @Override
     public boolean onCreate() {
         Context context = getContext();
         mDbHelper = new SticksAndStonesDbHelper(context);
         return true;
-    }
-
-    public static UriMatcher buildUriMatcher() {
-        UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-        uriMatcher.addURI(SticksAndStonesContract.AUTHORITY, SticksAndStonesContract.PATH_PLAYERS, PLAYERS);
-        uriMatcher.addURI(SticksAndStonesContract.AUTHORITY, SticksAndStonesContract.PATH_PLAYERS + "/#", A_PLAYER);
-
-        return uriMatcher;
     }
 
     @Nullable
@@ -62,7 +55,6 @@ public class SticksAndStonesContentProvider extends ContentProvider {
                 throw new UnsupportedOperationException("noob");
         }
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
-
         return retCursor;
     }
 
@@ -90,7 +82,6 @@ public class SticksAndStonesContentProvider extends ContentProvider {
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         final SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int match = sUriMatcher.match(uri);
-
         int numberOfRowsDeleted;
 
         switch (match) {
@@ -99,7 +90,6 @@ public class SticksAndStonesContentProvider extends ContentProvider {
                         selection,
                         selectionArgs);
                 break;
-
             default:
                 throw new UnsupportedOperationException("lul");
         }

@@ -7,21 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.afrikappakorps.sticksandstones.data.SticksAndStonesContentProvider;
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract;
 
-/**
- * Created by hangsun on 7/17/17.
- */
-
-public class SticksAdapter extends RecyclerView.Adapter<SticksAdapter.SticksAdapterViewHolder> {
-
+public class AddPlayersAdapter extends RecyclerView.Adapter<AddPlayersAdapter.SticksAdapterViewHolder> {
     private Context mContext;
-
     private Cursor mPlayerData;
 
-    public SticksAdapter(Context context) {
+    public AddPlayersAdapter(Context context) {
         mContext = context;
     }
 
@@ -32,7 +24,6 @@ public class SticksAdapter extends RecyclerView.Adapter<SticksAdapter.SticksAdap
                 .inflate(R.layout.player_list_item, parent, false);
         return new SticksAdapterViewHolder(view);
     }
-
 
     @Override
     public void onBindViewHolder(SticksAdapterViewHolder holder, int position) {
@@ -47,7 +38,6 @@ public class SticksAdapter extends RecyclerView.Adapter<SticksAdapter.SticksAdap
 
         SticksAdapterViewHolder(View view) {
             super(view);
-
             playerName = view.findViewById(R.id.player_name);
         }
     }
@@ -56,8 +46,9 @@ public class SticksAdapter extends RecyclerView.Adapter<SticksAdapter.SticksAdap
     public int getItemCount() {
         if (mPlayerData != null) {
             return mPlayerData.getCount();
+        } else {
+            return 0;
         }
-        else return 0;
     }
 
     public Cursor swapCursor(Cursor newCursor) {

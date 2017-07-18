@@ -8,7 +8,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.EditText;
 
-public class AddUserDialogFragment extends DialogFragment {
+public class AddPlayerDialogFragment extends DialogFragment {
     AddUserDialogListener listener;
     public interface AddUserDialogListener {
         public void onAddUserDialogPositiveClick(DialogFragment dialog, EditText editor);
@@ -25,7 +25,7 @@ public class AddUserDialogFragment extends DialogFragment {
                 .setView(nameEditor)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        listener.onAddUserDialogPositiveClick(AddUserDialogFragment.this, nameEditor);
+                        listener.onAddUserDialogPositiveClick(AddPlayerDialogFragment.this, nameEditor);
                         dialog.dismiss();
                     }
                 })
