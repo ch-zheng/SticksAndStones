@@ -20,8 +20,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, NewGameActivity.class));
                 break;
             case R.id.button_resumegame:
-                //TODO: Resume existing game
-                startActivity(new Intent(this, GameActivity.class)); //DEBUGGING
+                Intent intent = new Intent(this, GameActivity.class);
+                intent.putExtra(GameActivity.IS_NEW_GAME, false);
+                startActivity(intent);
                 break;
         }
     }

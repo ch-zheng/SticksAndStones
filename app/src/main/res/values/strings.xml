@@ -11,6 +11,7 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <!-- Game activity -->
+    <string name="match">Match</string>
     <string name="round">Round</string>
     <string name="prompt">Prompt</string>
     <string name="name">Name</string>

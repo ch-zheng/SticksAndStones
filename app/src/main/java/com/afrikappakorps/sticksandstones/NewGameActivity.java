@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -68,7 +69,9 @@ public class NewGameActivity extends AppCompatActivity
                 new AddPlayerDialogFragment().show(getFragmentManager(), "adduser");
                 break;
             case R.id.button_creategame:
-                //TODO: Create new game
+                Intent intent = new Intent(this, GameActivity.class);
+                intent.putExtra(GameActivity.IS_NEW_GAME, true);
+                startActivity(intent);
                 break;
         }
     }
