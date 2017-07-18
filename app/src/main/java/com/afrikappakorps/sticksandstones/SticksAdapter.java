@@ -59,13 +59,10 @@ public class SticksAdapter extends RecyclerView.Adapter<SticksAdapter.SticksAdap
         else return 0;
     }
 
-    public void setPlayerData() {
-        mPlayerData = mContext.getContentResolver()
-                .query(SticksAndStonesContract.PlayerEntry.CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        null);
+    public Cursor swapCursor(Cursor newCursor) {
+        final Cursor oldCursor = mPlayerData;
+        mPlayerData = newCursor;
         notifyDataSetChanged();
+        return oldCursor;
     }
 }

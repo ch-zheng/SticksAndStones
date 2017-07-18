@@ -75,12 +75,13 @@ public class SticksAndStonesContentProvider extends ContentProvider {
                 db.insert(SticksAndStonesContract.PlayerEntry.TABLE_NAME,
                         null,
                         values);
-                return uri;
+                break;
             }
             default:
                 throw new UnsupportedOperationException("lul noob");
         }
-
+        getContext().getContentResolver().notifyChange(uri, null);
+        return uri;
     }
 
     @Override
