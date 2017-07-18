@@ -63,7 +63,7 @@ public class NewGameActivity extends AppCompatActivity
         ContentValues values = new ContentValues();
         values.put(SticksAndStonesContract.PlayerEntry.COLUMN_PLAYER_NAME, editor.getText().toString());
         values.put(SticksAndStonesContract.PlayerEntry.COLUMN_POINT_COUNT, 0);
-        getContentResolver().insert(SticksAndStonesContract.PlayerEntry.CONTENT_URI, cv);
+        getContentResolver().insert(SticksAndStonesContract.PlayerEntry.CONTENT_URI, values);
     }
 
     //LOADER CALLBACK METHODS
