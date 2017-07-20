@@ -17,21 +17,10 @@
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
     <TextView
-        android:id="@+id/text_promptheader"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_game"
-        app:layout_constraintBottom_toTopOf="@+id/text_prompt"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:text="@string/prompt"
-        android:typeface="monospace"
-        android:gravity="center_horizontal"/>
-    <TextView
         android:id="@+id/text_prompt"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/text_promptheader"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_game"
         app:layout_constraintBottom_toTopOf="@+id/text_name1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

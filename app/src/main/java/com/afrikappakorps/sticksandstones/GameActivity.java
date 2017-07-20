@@ -113,7 +113,6 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    //GAME LOGIC METHODS
     private void addPoint(int player) {
         mPlayers.moveToPosition(player);
         ContentValues values = new ContentValues();
