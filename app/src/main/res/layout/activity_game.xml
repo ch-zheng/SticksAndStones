@@ -70,7 +70,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/text_entry1"
         app:layout_constraintLeft_toRightOf="@+id/text_entry1"
         app:layout_constraintRight_toRightOf="parent"
-        android:text="@string/vote"/>
+        android:text="@string/vote"
+        android:onClick="onButtonClick"/>
     <!-- SECOND PLAYER -->
     <TextView
         android:id="@+id/text_name2"
@@ -103,7 +104,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/text_entry2"
         app:layout_constraintLeft_toRightOf="@+id/text_entry2"
         app:layout_constraintRight_toRightOf="parent"
-        android:text="@string/vote"/>
+        android:text="@string/vote"
+        android:onClick="onButtonClick"/>
     <!-- JUDGE -->
     <TextView
         android:id="@+id/text_judge"
