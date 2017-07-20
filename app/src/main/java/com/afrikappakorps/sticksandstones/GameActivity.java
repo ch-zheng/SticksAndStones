@@ -1,24 +1,27 @@
 package com.afrikappakorps.sticksandstones;
 
-import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log; //FIXME: DELETE ME
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
-import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract;
+import android.widget.TextView;
 
-public class GameActivity extends AppCompatActivity
-    implements LoaderManager.LoaderCallbacks<Cursor> {
+import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
+
+public class GameActivity extends AppCompatActivity {
     public static final String IS_NEW_GAME = "isNewGame";
+
     private int round, player1, player2, judge;
+    private String prompt, entry1, entry2;
+    private TextView promptText, nameText1, entryText1, nameText2, entryText2, judgeText;
     private Cursor mPlayers;
 
     /* PRE-RUN LIFECYCLE METHODS */
@@ -27,7 +30,7 @@ public class GameActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        getLoaderManager().initLoader(0, null, this);
+        refreshCursor();
 
         //Key-value setup
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
@@ -42,10 +45,23 @@ public class GameActivity extends AppCompatActivity
         player2 = sharedPref.getInt("player2", 1);
         judge = sharedPref.getInt("judge", 2);
 
+        prompt = generatePhrase(false);
+        entry1 = generatePhrase(true);
+        entry2 = generatePhrase(true);
+
         //App bar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_game));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Round " + round); //FIXME: Move to setGameText()
+
+        //Set member TextViews
+        promptText = (TextView) findViewById(R.id.text_prompt);
+        nameText1 = (TextView) findViewById(R.id.text_name1);
+        entryText1 = (TextView) findViewById(R.id.text_entry1);
+        nameText2 = (TextView) findViewById(R.id.text_name2);
+        entryText2 = (TextView) findViewById(R.id.text_entry2);
+        judgeText = (TextView) findViewById(R.id.text_judge);
+
+        refreshGameText();
     }
 
     @Override
@@ -62,31 +78,103 @@ public class GameActivity extends AppCompatActivity
         //Voting buttons
         switch(view.getId()) {
             case R.id.button_vote1:
-                //TODO: Give Player1 a point
-                player2 = wrapIncrement(player2, mPlayers.getCount());
-                if (player2 == player1) player2 = wrapIncrement(player2, mPlayers.getCount());
+                //Give Player1 a point
+                addPoint(player1);
+                //Next player
+                player2 = nextPlayer(player2);
+                if (player2 == player1) player2 = nextPlayer(player2);
                 break;
             case R.id.button_vote2:
-                //TODO: Give Player2 a point
+                //Give Player2 a point
+                addPoint(player2);
+                //Next player
                 player1 = player2;
-                player2 = wrapIncrement(player1, mPlayers.getCount());
+                player2 = nextPlayer(player1);
                 break;
         }
-        round++;
-        //TODO: Reset the round
-    }
 
-    //TODO: Finish this
-    private void setGameText() {
-        getSupportActionBar().setTitle("Round " + round);
-    }
+        //Setup next round
+        if (view.getId() == R.id.button_vote1 || view.getId() == R.id.button_vote2) {
+            prompt = generatePhrase(false);
+            entry1 = generatePhrase(true);
+            entry2 = generatePhrase(true);
+            round++;
+            refreshGameText();
 
-    private int wrapIncrement(int input, int exclusiveLimit) {
-        input++;
-        if (input >= exclusiveLimit) {
-            input = 0;
+            //FIXME: DELETE ME LATER
+            //Prove that scoring works
+            mPlayers.moveToFirst();
+            int score1 = mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT));
+            mPlayers.moveToNext();
+            int score2 = mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT));
+            mPlayers.moveToNext();
+            int score3 = mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT));
+            Log.d("POTATO", "Charlie: " + score1 + ", Hang: " + score2 + ", George: " + score3);
         }
-        return input;
+    }
+
+    //GAME LOGIC METHODS
+    private void addPoint(int player) {
+        mPlayers.moveToPosition(player);
+        ContentValues values = new ContentValues();
+        values.put(PlayerEntry.COLUMN_POINT_COUNT, mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT)) + 1);
+        getContentResolver().update(
+                PlayerEntry.CONTENT_URI,
+                values,
+                "_ID=?",
+                new String[] {String.valueOf(player + 1)}
+        );
+        refreshCursor();
+    }
+
+    private int nextPlayer(int player) {
+        player++;
+        if (player >= mPlayers.getCount()) {
+            player = 0;
+        }
+        return player;
+    }
+
+    //Returns silly phrases (TODO by George)
+    private String generatePhrase(boolean isEntry) {
+        if (isEntry) {
+            return "Jesus riding a dinosaur";
+        } else {
+            return "Who would win in a fight?";
+        }
+    }
+
+    //Refreshes all TextViews
+    private void refreshGameText() {
+        getSupportActionBar().setTitle(getResources().getString(R.string.round) + round);
+        promptText.setText(prompt);
+        entryText1.setText(entry1);
+        entryText2.setText(entry2);
+
+        mPlayers.moveToPosition(player1);
+        nameText1.setText(
+                mPlayers.getString(mPlayers.getColumnIndex(PlayerEntry.COLUMN_PLAYER_NAME))
+        );
+
+        mPlayers.moveToPosition(player2);
+        nameText2.setText(
+                mPlayers.getString(mPlayers.getColumnIndex(PlayerEntry.COLUMN_PLAYER_NAME))
+        );
+
+        mPlayers.moveToPosition(judge);
+        judgeText.setText(
+                getResources().getString(R.string.judge) + ": " +
+                mPlayers.getString(mPlayers.getColumnIndex(PlayerEntry.COLUMN_PLAYER_NAME))
+        );
+    }
+
+    private void refreshCursor() {
+        mPlayers = getContentResolver().query(
+                PlayerEntry.CONTENT_URI,
+                new String[] {PlayerEntry.COLUMN_PLAYER_NAME, PlayerEntry.COLUMN_POINT_COUNT},
+                null, null,
+                PlayerEntry._ID + " ASC"
+        );
     }
 
     //APP BAR METHODS
@@ -107,23 +195,6 @@ public class GameActivity extends AppCompatActivity
                 return true;
             default: return super.onOptionsItemSelected(item);
         }
-    }
-
-    //LOADER METHODS
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        //FIXME: More specific parameters?
-        return new CursorLoader(this, SticksAndStonesContract.PlayerEntry.CONTENT_URI, null, null, null, null);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mPlayers = data;
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mPlayers = null;
     }
 
     /* POST-RUN LIFECYCLE METHODS */
@@ -147,5 +218,6 @@ public class GameActivity extends AppCompatActivity
         prefEditor.putInt("player1", player1);
         prefEditor.putInt("player2", player2);
         prefEditor.putInt("judge", judge);
+        prefEditor.commit();
     }
 }

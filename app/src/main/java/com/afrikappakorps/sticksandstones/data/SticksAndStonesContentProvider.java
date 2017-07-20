@@ -128,7 +128,22 @@ public class SticksAndStonesContentProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        int rowIdChanged;
+
+        switch (match) {
+            case PLAYERS:
+                rowIdChanged = db.update(SticksAndStonesContract.PlayerEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Invalid URI");
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowIdChanged;
     }
 
     @Nullable
