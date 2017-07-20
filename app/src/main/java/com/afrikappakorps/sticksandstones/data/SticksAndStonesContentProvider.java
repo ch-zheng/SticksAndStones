@@ -122,13 +122,28 @@ public class SticksAndStonesContentProvider extends ContentProvider {
         if (numberOfRowsDeleted > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
-
+        getContext().getContentResolver().notifyChange(uri, null);
         return numberOfRowsDeleted;
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        int match = sUriMatcher.match(uri);
+        int rowIdChanged;
+
+        switch (match) {
+            case PLAYERS:
+                rowIdChanged = db.update(SticksAndStonesContract.PlayerEntry.TABLE_NAME,
+                        values,
+                        selection,
+                        selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("ffs");
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowIdChanged;
     }
 
     @Nullable
