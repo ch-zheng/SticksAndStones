@@ -19,4 +19,7 @@
     <string name="vote">Vote</string>
     <string name="judge">Judge</string>
     <string name="timer">Time Wasted</string>
+    <!-- Game app bar -->
+    <string name="scoreboard">Scoreboard</string>
+    <string name="pause">Pause</string>
 </resources>

@@ -140,7 +140,7 @@ public class SticksAndStonesContentProvider extends ContentProvider {
                         selectionArgs);
                 break;
             default:
-                throw new UnsupportedOperationException("ffs");
+                throw new UnsupportedOperationException("Invalid URI");
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return rowIdChanged;
