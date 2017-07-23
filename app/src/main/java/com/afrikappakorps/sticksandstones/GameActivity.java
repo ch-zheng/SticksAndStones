@@ -1,5 +1,6 @@
 package com.afrikappakorps.sticksandstones;
 
+import android.app.DownloadManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
@@ -147,35 +149,27 @@ public class GameActivity extends AppCompatActivity {
     private String generatePhrase(boolean isEntry) {
         //TODO query multiple text files on several threads to generate a full phrase
         final StringBuilder text = new StringBuilder();
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
         final String[] phraseParts = new String[3]; //3 is just an arbitrary value here, is an array to store individual parts of the phrase
         phraseParts[1] = "";
         phraseParts[2] = "";
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                InputStream inputStream = getResources().openRawResource(R.raw.phrases);
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader buffReader = new BufferedReader(inputStreamReader);
-                try {
-                    int x = 0;
-                    String line;
-                    while((line = buffReader.readLine()) != null) {
-                        x++;
-                        if (x == 2) { //replace this arbitrary 2 with a param in the method
-                            phraseParts[0] = line; //add other parts in other threads
-                            /*text.append(line);
-                            text.append(" ");
-                            more stuff can be appended to this, from other text files for example*/
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                phraseParts[0] = queryTextFile(R.raw.phrases);
                 countDownLatch.countDown();
             }
         });
         t.start();
+
+        Thread readWord2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                phraseParts[1] = queryTextFile(R.raw.phrases2);
+                countDownLatch.countDown();
+            }
+        });
+        readWord2.start();
 
         try {
             countDownLatch.await();
@@ -184,6 +178,32 @@ public class GameActivity extends AppCompatActivity {
         }
         return phraseParts[0] + " " + phraseParts[1] + " " + phraseParts[2];
     }
+
+    private String queryTextFile(int id) {
+        InputStream inputStream = getResources().openRawResource(id);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader buffReader = new BufferedReader(inputStreamReader);
+        Random random = new Random();
+
+        int lineNum = random.nextInt(6) + 1; //Replace parameter with whatever the # of lines is
+        String queriedWord = "";
+
+        try {
+            int x = 0;
+            String line;
+
+            while ((line = buffReader.readLine()) != null) {
+                x++;
+                if (x == lineNum) {
+                    queriedWord = line;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return queriedWord;
+    }
+
 
     //Refreshes all TextViews
     private void refreshGameText() {
