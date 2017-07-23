@@ -30,6 +30,10 @@ public class NewGameActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newgame);
 
+        getContentResolver().delete(SticksAndStonesContract.PlayerEntry.CONTENT_URI,
+                null,
+                null);
+
         //Toolbar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_newgame));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

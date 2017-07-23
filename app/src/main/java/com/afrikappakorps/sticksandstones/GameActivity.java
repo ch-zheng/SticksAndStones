@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.renderscript.ScriptGroup;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -16,9 +17,17 @@ import android.widget.TextView;
 
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
+
 public class GameActivity extends AppCompatActivity {
     public static final String IS_NEW_GAME = "isNewGame";
-
+    //TODO make like a Next Round in: 3... 2... 1... sort of thing with CountDownTimer
     private int round, player1, player2, judge;
     private String prompt, entry1, entry2;
     private TextView promptText, nameText1, entryText1, nameText2, entryText2, judgeText;
@@ -136,11 +145,44 @@ public class GameActivity extends AppCompatActivity {
 
     //Returns silly phrases (TODO by George)
     private String generatePhrase(boolean isEntry) {
-        if (isEntry) {
-            return "Jesus riding a dinosaur";
-        } else {
-            return "Who would win in a fight?";
+        //TODO query multiple text files on several threads to generate a full phrase
+        final StringBuilder text = new StringBuilder();
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final String[] phraseParts = new String[3]; //3 is just an arbitrary value here, is an array to store individual parts of the phrase
+        phraseParts[1] = "";
+        phraseParts[2] = "";
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                InputStream inputStream = getResources().openRawResource(R.raw.phrases);
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader buffReader = new BufferedReader(inputStreamReader);
+                try {
+                    int x = 0;
+                    String line;
+                    while((line = buffReader.readLine()) != null) {
+                        x++;
+                        if (x == 2) { //replace this arbitrary 2 with a param in the method
+                            phraseParts[0] = line; //add other parts in other threads
+                            /*text.append(line);
+                            text.append(" ");
+                            more stuff can be appended to this, from other text files for example*/
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                countDownLatch.countDown();
+            }
+        });
+        t.start();
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        return phraseParts[0] + " " + phraseParts[1] + " " + phraseParts[2];
     }
 
     //Refreshes all TextViews
