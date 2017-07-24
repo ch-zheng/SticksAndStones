@@ -15,7 +15,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
+
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 public class GameActivity extends AppCompatActivity {
     public static final String IS_NEW_GAME = "isNewGame";
@@ -50,9 +58,9 @@ public class GameActivity extends AppCompatActivity {
         judge = sharedPref.getInt("judge", 2);
         stopTime = sharedPref.getLong("stoptime", 0);
 
-        prompt = generatePhrase(false);
-        entry1 = generatePhrase(true);
-        entry2 = generatePhrase(true);
+        prompt = generatePrompt();
+        entry1 = generateEntry();
+        entry2 = generateEntry();
 
         //App bar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_game));
@@ -127,9 +135,9 @@ public class GameActivity extends AppCompatActivity {
 
         //Setup next round
         if (view.getId() == R.id.button_vote1 || view.getId() == R.id.button_vote2) {
-            prompt = generatePhrase(false);
-            entry1 = generatePhrase(true);
-            entry2 = generatePhrase(true);
+            prompt = generatePrompt();
+            entry1 = generateEntry();
+            entry2 = generateEntry();
             round++;
             refreshGameText();
         }
@@ -164,13 +172,91 @@ public class GameActivity extends AppCompatActivity {
         return player;
     }
 
-    //Returns silly phrases (TODO by George)
-    private String generatePhrase(boolean isEntry) {
-        if (isEntry) {
-            return "Jesus riding a dinosaur";
-        } else {
-            return "Who would win in a fight?";
+    private String generatePrompt() {
+        final String[] prompt = new String[1];
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                prompt[0] = queryTextFile(R.raw.prompts);
+                countDownLatch.countDown();
+            }
+        }).start();
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        return prompt[0];
+    }
+
+    //Returns silly phrases
+    private String generateEntry() {
+        //TODO query multiple text files on several threads to generate a full phrase
+        final StringBuilder text = new StringBuilder();
+        final CountDownLatch countDownLatch = new CountDownLatch(3);
+        final String[] phraseParts = new String[3]; //3 is just an arbitrary value here, is an array to store individual parts of the phrase
+        phraseParts[1] = "";
+        phraseParts[2] = "";
+        Thread readWordOne = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                phraseParts[0] = queryTextFile(R.raw.phrases);
+                countDownLatch.countDown();
+            }
+        });
+        readWordOne.start();
+
+        Thread readWord2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                phraseParts[1] = queryTextFile(R.raw.phrases2);
+                countDownLatch.countDown();
+            }
+        });
+        readWord2.start();
+
+        Thread readWord3 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                phraseParts[2] = queryTextFile(R.raw.phrases3);
+                countDownLatch.countDown();
+            }
+        });
+        readWord3.start();
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return phraseParts[0] + " " + phraseParts[1] + " " + phraseParts[2];
+    }
+
+    private String queryTextFile(int id) {
+        InputStream inputStream = getResources().openRawResource(id);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader buffReader = new BufferedReader(inputStreamReader);
+        Random random = new Random();
+
+        int lineNum = random.nextInt(6) + 1; //Replace 6 with whatever the # of lines is
+        String queriedWord = "";
+
+        try {
+            int x = 0;
+            String line;
+
+            while ((line = buffReader.readLine()) != null) {
+                x++;
+                if (x == lineNum) {
+                    queriedWord = line;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "[FAILED TO QUERY WORD]";
+        }
+        return queriedWord;
     }
 
     //Refreshes all TextViews
