@@ -16,14 +16,14 @@ import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
-import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+
+import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
 public class GameActivity extends AppCompatActivity {
     public static final String IS_NEW_GAME = "isNewGame";
@@ -258,33 +258,6 @@ public class GameActivity extends AppCompatActivity {
         }
         return queriedWord;
     }
-
-    private String queryTextFile(int id) {
-        InputStream inputStream = getResources().openRawResource(id);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader buffReader = new BufferedReader(inputStreamReader);
-        Random random = new Random();
-
-        int lineNum = random.nextInt(6) + 1; //Replace 6 with whatever the # of lines is
-        String queriedWord = "";
-
-        try {
-            int x = 0;
-            String line;
-
-            while ((line = buffReader.readLine()) != null) {
-                x++;
-                if (x == lineNum) {
-                    queriedWord = line;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "[FAILED TO QUERY WORD]";
-        }
-        return queriedWord;
-    }
-
 
     //Refreshes all TextViews
     private void refreshGameText() {
