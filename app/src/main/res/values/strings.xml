@@ -10,6 +10,7 @@
     <string name="title_activity_newgame">Create New Game</string>
     <string name="add_player">Add Player</string>
     <string name="create_game">Create Game</string>
+    <string name="must_have_players">Must have at least 3 players!</string>
     <!-- Game activity -->
     <string name="round">Round</string>
     <string name="prompt">Prompt</string>

@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
@@ -30,10 +31,6 @@ public class NewGameActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newgame);
         getContentResolver().delete(PlayerEntry.CONTENT_URI, null, null);
-
-        getContentResolver().delete(PlayerEntry.CONTENT_URI,
-                null,
-                null);
 
         //Toolbar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_newgame));
@@ -74,6 +71,11 @@ public class NewGameActivity extends AppCompatActivity
                 new AddPlayerDialogFragment().show(getFragmentManager(), "adduser");
                 break;
             case R.id.button_creategame:
+                if (mAdapter.getItemCount() < 3) {
+                    Toast.makeText(getApplicationContext(), R.string.must_have_players, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+
                 Intent intent = new Intent(this, GameActivity.class);
                 intent.putExtra(GameActivity.IS_NEW_GAME, true);
                 startActivity(intent);
