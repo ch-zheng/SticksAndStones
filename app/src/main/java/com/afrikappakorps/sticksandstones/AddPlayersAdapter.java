@@ -21,7 +21,7 @@ public class AddPlayersAdapter extends RecyclerView.Adapter<AddPlayersAdapter.St
     public SticksAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater
                 .from(mContext)
-                .inflate(R.layout.player_list_item, parent, false);
+                .inflate(R.layout.item_playername, parent, false);
         return new SticksAdapterViewHolder(view);
     }
 

@@ -4,14 +4,13 @@
     <string name="new_game">New Game</string>
     <string name="resume_game">Resume Game</string>
     <string name="settings">Settings</string>
+    <string name="new_game_message">Create new game? Existing game will be overwritten.</string>
+    <string name="no_existing_game">No existing game!</string>
     <!-- New Game activity -->
     <string name="title_activity_newgame">Create New Game</string>
     <string name="add_player">Add Player</string>
     <string name="create_game">Create Game</string>
-    <string name="confirm">Confirm</string>
-    <string name="cancel">Cancel</string>
     <!-- Game activity -->
-    <string name="match">Match</string>
     <string name="round">Round</string>
     <string name="prompt">Prompt</string>
     <string name="name">Name</string>
@@ -19,7 +18,15 @@
     <string name="vote">Vote</string>
     <string name="judge">Judge</string>
     <string name="timer">Time Wasted</string>
+    <!-- Endgame activity -->
+    <string name="end_game">End Game</string>
+    <string name="final_score">Final Score</string>
     <!-- Game app bar -->
     <string name="scoreboard">Scoreboard</string>
     <string name="pause">Pause</string>
+    <!-- Dialogs -->
+    <string name="game_paused">Game Paused</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
 </resources>

@@ -2,30 +2,34 @@ package com.afrikappakorps.sticksandstones;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log; //FIXME: DELETE ME
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
-
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
 public class GameActivity extends AppCompatActivity {
     public static final String IS_NEW_GAME = "isNewGame";
+    private final int pointLimit = 10;
 
     private int round, player1, player2, judge;
+    private long stopTime = 0;
     private String prompt, entry1, entry2;
+
     private TextView promptText, nameText1, entryText1, nameText2, entryText2, judgeText;
     private Cursor mPlayers;
 
-    /* PRE-RUN LIFECYCLE METHODS */
-    //TODO: Determine which of this stuff belongs in onStart()
+    /* ACTIVITY LIFECYCLE METHODS */
+    //TODO: Determine what belongs in onStart()
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +48,7 @@ public class GameActivity extends AppCompatActivity {
         player1 = sharedPref.getInt("player1", 0);
         player2 = sharedPref.getInt("player2", 1);
         judge = sharedPref.getInt("judge", 2);
+        stopTime = sharedPref.getLong("stoptime", 0);
 
         prompt = generatePhrase(false);
         entry1 = generatePhrase(true);
@@ -70,10 +75,37 @@ public class GameActivity extends AppCompatActivity {
 
         //Start timer
         Chronometer timer = (Chronometer) findViewById(R.id.timer);
+        timer.setBase(SystemClock.elapsedRealtime() + stopTime);
         timer.start();
     }
 
-    /* APPLICATION RUNTIME METHODS */
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //Stop timer
+        Chronometer timer = (Chronometer) findViewById(R.id.timer);
+        stopTime = timer.getBase() - SystemClock.elapsedRealtime();
+        timer.stop();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        //Save key-values
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefEditor = sharedPref.edit();
+        prefEditor.putInt("round", round);
+        prefEditor.putInt("player1", player1);
+        prefEditor.putInt("player2", player2);
+        prefEditor.putInt("judge", judge);
+        prefEditor.putLong("stoptime", 0);
+        prefEditor.apply();
+    }
+
+    /* CUSTOM METHODS */
+    //TODO: Confirmation dialog
     public void onButtonClick(View view) {
         //Voting buttons
         switch(view.getId()) {
@@ -100,29 +132,27 @@ public class GameActivity extends AppCompatActivity {
             entry2 = generatePhrase(true);
             round++;
             refreshGameText();
-
-            //FIXME: DELETE ME LATER
-            //Prove that scoring works
-            mPlayers.moveToFirst();
-            int score1 = mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT));
-            mPlayers.moveToNext();
-            int score2 = mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT));
-            mPlayers.moveToNext();
-            int score3 = mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT));
-            Log.d("POTATO", "Charlie: " + score1 + ", Hang: " + score2 + ", George: " + score3);
         }
     }
 
     private void addPoint(int player) {
+        Log.d("POTATO", "addPoint called to " + player); //FIXME
         mPlayers.moveToPosition(player);
         ContentValues values = new ContentValues();
         values.put(PlayerEntry.COLUMN_POINT_COUNT, mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT)) + 1);
         getContentResolver().update(
                 PlayerEntry.CONTENT_URI,
                 values,
-                "_ID=?",
+                PlayerEntry._ID + "=?",
                 new String[] {String.valueOf(player + 1)}
         );
+
+        //Endgame conditions
+        Log.d("POTATO", "Points: " + values.getAsInteger(PlayerEntry.COLUMN_POINT_COUNT)); //FIXME
+        if (values.getAsInteger(PlayerEntry.COLUMN_POINT_COUNT) >= pointLimit) {
+            startActivity(new Intent(this, EndGameActivity.class));
+        }
+
         refreshCursor();
     }
 
@@ -165,6 +195,8 @@ public class GameActivity extends AppCompatActivity {
                 getResources().getString(R.string.judge) + ": " +
                 mPlayers.getString(mPlayers.getColumnIndex(PlayerEntry.COLUMN_PLAYER_NAME))
         );
+        Chronometer timer = (Chronometer) findViewById(R.id.timer);
+        timer.setBase(SystemClock.elapsedRealtime());
     }
 
     private void refreshCursor() {
@@ -187,36 +219,18 @@ public class GameActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_scoreboard:
-                //TODO: Show scoreboard (fullscreen dialog?)
+                new ScoreboardDialogFragment().show(getFragmentManager(), "scoreboard");
                 return true;
             case R.id.action_pause:
-                //TODO: Show pause dialog, stop timer
+                Chronometer timer = (Chronometer) findViewById(R.id.timer);
+                stopTime = timer.getBase() - SystemClock.elapsedRealtime();
+                timer.stop();
+
+                PauseDialogFragment dialog = new PauseDialogFragment();
+                dialog.setStopTime(stopTime);
+                dialog.show(getFragmentManager(), "pause");
                 return true;
             default: return super.onOptionsItemSelected(item);
         }
-    }
-
-    /* POST-RUN LIFECYCLE METHODS */
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        //Stop timer
-        Chronometer timer = (Chronometer) findViewById(R.id.timer);
-        timer.stop();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        //Save key-values
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor prefEditor = sharedPref.edit();
-        prefEditor.putInt("round", round);
-        prefEditor.putInt("player1", player1);
-        prefEditor.putInt("player2", player2);
-        prefEditor.putInt("judge", judge);
-        prefEditor.commit();
     }
 }

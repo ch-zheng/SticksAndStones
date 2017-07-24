@@ -16,7 +16,7 @@ public class SticksAndStonesDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String SQL_CREATE_ULTRA_CLASH_TABLE =
                 "CREATE TABLE " + SticksAndStonesContract.PlayerEntry.TABLE_NAME + " (" +
-                        SticksAndStonesContract.PlayerEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        SticksAndStonesContract.PlayerEntry._ID + " INTEGER PRIMARY KEY, " +
                         SticksAndStonesContract.PlayerEntry.COLUMN_PLAYER_NAME + " TEXT NOT NULL, " +
                         SticksAndStonesContract.PlayerEntry.COLUMN_POINT_COUNT + " INTEGER NOT NULL" +
                         "); ";

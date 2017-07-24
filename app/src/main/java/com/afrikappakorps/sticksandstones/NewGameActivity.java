@@ -16,8 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.EditText;
-
-import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract;
+import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
 public class NewGameActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<Cursor>,
@@ -29,6 +28,7 @@ public class NewGameActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newgame);
+        getContentResolver().delete(PlayerEntry.CONTENT_URI, null, null);
 
         //Toolbar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_newgame));
@@ -52,8 +52,8 @@ public class NewGameActivity extends AppCompatActivity
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 int id = (int) viewHolder.itemView.getTag();
-                Uri uri = SticksAndStonesContract.PlayerEntry.CONTENT_URI;
-                String whereClause = "_id=?";
+                Uri uri = PlayerEntry.CONTENT_URI;
+                String whereClause = PlayerEntry._ID + "=?";
                 String[] whereArgs = {String.valueOf(id)};
                 getContentResolver().delete(uri, whereClause, whereArgs);
             }
@@ -79,15 +79,18 @@ public class NewGameActivity extends AppCompatActivity
     @Override
     public void onAddUserDialogPositiveClick(DialogFragment dialog, EditText editor) {
         ContentValues values = new ContentValues();
-        values.put(SticksAndStonesContract.PlayerEntry.COLUMN_PLAYER_NAME, editor.getText().toString());
-        values.put(SticksAndStonesContract.PlayerEntry.COLUMN_POINT_COUNT, 0);
-        getContentResolver().insert(SticksAndStonesContract.PlayerEntry.CONTENT_URI, values);
+        values.put(PlayerEntry.COLUMN_PLAYER_NAME, editor.getText().toString());
+        values.put(PlayerEntry.COLUMN_POINT_COUNT, 0);
+        getContentResolver().insert(PlayerEntry.CONTENT_URI, values);
     }
 
     //LOADER CALLBACK METHODS
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this, SticksAndStonesContract.PlayerEntry.CONTENT_URI, null, null, null, null);
+        return new CursorLoader(this, PlayerEntry.CONTENT_URI,
+                new String[] {PlayerEntry.COLUMN_PLAYER_NAME, PlayerEntry.COLUMN_POINT_COUNT, PlayerEntry._ID},
+                null, null, null
+        );
     }
 
     @Override
