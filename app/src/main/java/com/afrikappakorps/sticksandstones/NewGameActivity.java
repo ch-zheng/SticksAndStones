@@ -31,7 +31,7 @@ public class NewGameActivity extends AppCompatActivity
         setContentView(R.layout.activity_newgame);
         getContentResolver().delete(PlayerEntry.CONTENT_URI, null, null);
 
-        getContentResolver().delete(SticksAndStonesContract.PlayerEntry.CONTENT_URI,
+        getContentResolver().delete(PlayerEntry.CONTENT_URI,
                 null,
                 null);
 
