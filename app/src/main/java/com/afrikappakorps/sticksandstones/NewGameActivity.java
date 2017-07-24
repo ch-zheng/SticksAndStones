@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.EditText;
+
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
 public class NewGameActivity extends AppCompatActivity

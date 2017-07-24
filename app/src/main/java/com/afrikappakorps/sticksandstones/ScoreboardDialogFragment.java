@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.CursorAdapter;
 import android.widget.SimpleCursorAdapter;
+
 import com.afrikappakorps.sticksandstones.data.SticksAndStonesContract.PlayerEntry;
 
 public class ScoreboardDialogFragment extends DialogFragment
