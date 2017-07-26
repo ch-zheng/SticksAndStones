@@ -13,8 +13,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.Chronometer;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,8 +37,10 @@ public class GameActivity extends AppCompatActivity {
     private long stopTime = 0;
     private String prompt, entry1, entry2;
 
-    private TextView promptText, nameText1, entryText1, nameText2, entryText2, judgeText;
+    private TextView promptText, nameText1, nameText2, judgeText;
     private Cursor mPlayers;
+
+    private TextSwitcher entryText1, entryText2;
 
     /* ACTIVITY LIFECYCLE METHODS */
     //TODO: Determine what belongs in onStart()
@@ -69,10 +75,36 @@ public class GameActivity extends AppCompatActivity {
         //Set member TextViews
         promptText = (TextView) findViewById(R.id.text_prompt);
         nameText1 = (TextView) findViewById(R.id.text_name1);
-        entryText1 = (TextView) findViewById(R.id.text_entry1);
+        entryText1 = (TextSwitcher) findViewById(R.id.text_entry1);
         nameText2 = (TextView) findViewById(R.id.text_name2);
-        entryText2 = (TextView) findViewById(R.id.text_entry2);
+        entryText2 = (TextSwitcher) findViewById(R.id.text_entry2);
         judgeText = (TextView) findViewById(R.id.text_judge);
+
+        entryText1.setFactory(new ViewSwitcher.ViewFactory() {
+            @Override
+            public View makeView() {
+                TextView view = new TextView(GameActivity.this);
+                view.setTextSize(32);
+                return view;
+            }
+        });
+        entryText2.setFactory(new ViewSwitcher.ViewFactory() {
+            @Override
+            public View makeView() {
+                TextView view = new TextView(GameActivity.this);
+                view.setTextSize(32);
+                return view;
+            }
+        });
+
+        TranslateAnimation in = new TranslateAnimation(400, 0, 0, 0);
+        TranslateAnimation out = new TranslateAnimation(0, -400, 0, -400);
+        in.setDuration(1000);
+        out.setDuration(1500);
+        entryText1.setInAnimation(in);
+        entryText1.setOutAnimation(out);
+        entryText2.setInAnimation(in);
+        entryText2.setOutAnimation(out);
 
         refreshGameText();
     }
