@@ -19,6 +19,7 @@
     <string name="vote">Vote</string>
     <string name="judge">Judge</string>
     <string name="timer">Time Wasted</string>
+    <string name="with_a">with a</string>
     <!-- Endgame activity -->
     <string name="end_game">End Game</string>
     <string name="final_score">Final Score</string>

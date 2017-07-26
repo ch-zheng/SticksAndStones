@@ -144,7 +144,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void addPoint(int player) {
-        Log.d("POTATO", "addPoint called to " + player); //FIXME
         mPlayers.moveToPosition(player);
         ContentValues values = new ContentValues();
         values.put(PlayerEntry.COLUMN_POINT_COUNT, mPlayers.getInt(mPlayers.getColumnIndex(PlayerEntry.COLUMN_POINT_COUNT)) + 1);
@@ -156,7 +155,6 @@ public class GameActivity extends AppCompatActivity {
         );
 
         //Endgame conditions
-        Log.d("POTATO", "Points: " + values.getAsInteger(PlayerEntry.COLUMN_POINT_COUNT)); //FIXME
         if (values.getAsInteger(PlayerEntry.COLUMN_POINT_COUNT) >= pointLimit) {
             startActivity(new Intent(this, EndGameActivity.class));
         }
@@ -173,95 +171,119 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private String generatePrompt() {
-        final String[] prompt = new String[1];
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final String[] prompt = new String[2];
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                prompt[0] = queryTextFile(R.raw.prompts);
+                prompt[0] = getRandomLine(R.raw.prompts);
                 countDownLatch.countDown();
             }
         }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                prompt[1] = getRandomLine(R.raw.locations);
+                countDownLatch.countDown();
+            }
+        }).start();
+
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return prompt[0];
+
+        return prompt[0] + " " + prompt[1];
     }
 
     //Returns silly phrases
     private String generateEntry() {
-        //TODO query multiple text files on several threads to generate a full phrase
-        final StringBuilder text = new StringBuilder();
+        final String[] phraseParts = new String[3];
+
+        //Text-file threads
         final CountDownLatch countDownLatch = new CountDownLatch(3);
-        final String[] phraseParts = new String[3]; //3 is just an arbitrary value here, is an array to store individual parts of the phrase
-        phraseParts[1] = "";
-        phraseParts[2] = "";
-        Thread readWordOne = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                phraseParts[0] = queryTextFile(R.raw.phrases);
+                phraseParts[0] = getRandomLine(R.raw.adjectives);
                 countDownLatch.countDown();
             }
-        });
-        readWordOne.start();
+        }).start();
 
-        Thread readWord2 = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                phraseParts[1] = queryTextFile(R.raw.phrases2);
+                phraseParts[1] = getRandomLine(R.raw.nouns);
                 countDownLatch.countDown();
             }
-        });
-        readWord2.start();
+        }).start();
 
-        Thread readWord3 = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                phraseParts[2] = queryTextFile(R.raw.phrases3);
+                phraseParts[2] = getRandomLine(R.raw.equipment);
                 countDownLatch.countDown();
             }
-        });
-        readWord3.start();
+        }).start();
 
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return phraseParts[0] + " " + phraseParts[1] + " " + phraseParts[2];
+
+        return phraseParts[0] + " " +
+                phraseParts[1] + " " +
+                getResources().getString(R.string.with_a) + " " +
+                phraseParts[2];
     }
 
-    private String queryTextFile(int id) {
-        InputStream inputStream = getResources().openRawResource(id);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader buffReader = new BufferedReader(inputStreamReader);
-        Random random = new Random();
+    private String getRandomLine(int id) {
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(
+                        getResources().openRawResource(id)
+                )
+        );
 
-        int lineNum = random.nextInt(6) + 1; //Replace 6 with whatever the # of lines is
-        String queriedWord = "";
-
+        //Get # of lines
+        int lineCount = 0;
         try {
-            int x = 0;
-            String line;
-
-            while ((line = buffReader.readLine()) != null) {
-                x++;
-                if (x == lineNum) {
-                    queriedWord = line;
-                }
-            }
+            while (reader.readLine() != null) lineCount++;
         } catch (IOException e) {
             e.printStackTrace();
-            return "[FAILED TO QUERY WORD]";
         }
-        return queriedWord;
+
+        //Reset buffer
+        reader = new BufferedReader(
+                new InputStreamReader(
+                        getResources().openRawResource(id)
+                )
+        );
+
+        //Read text file
+        Random random = new Random();
+        int targetLine = random.nextInt(lineCount) + 1;
+        String line = "";
+        try {
+            int count = 1;
+            while (count <= targetLine) {
+                line = reader.readLine();
+                count++;
+            }
+            reader.close();
+            return line;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //Refreshes all TextViews
     private void refreshGameText() {
-        getSupportActionBar().setTitle(getResources().getString(R.string.round) + round);
+        getSupportActionBar().setTitle(getResources().getString(R.string.round) + " " + round);
         promptText.setText(prompt);
         entryText1.setText(entry1);
         entryText2.setText(entry2);
