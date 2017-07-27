@@ -9,7 +9,6 @@ import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +17,6 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -32,12 +30,12 @@ public class GameActivity extends AppCompatActivity {
     private int round, player1, player2, judge;
     private long stopTime = 0;
     private String prompt, entry1, entry2;
-
     private TextView promptText, nameText1, entryText1, nameText2, entryText2, judgeText;
     private Cursor mPlayers;
 
     /* ACTIVITY LIFECYCLE METHODS */
     //TODO: Determine what belongs in onStart()
+    //FIXME: Saving timer
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,18 +47,18 @@ public class GameActivity extends AppCompatActivity {
         if (getIntent().getExtras().getBoolean(IS_NEW_GAME)) {
             SharedPreferences.Editor prefEditor = sharedPref.edit();
             prefEditor.clear();
-            prefEditor.apply(); //If no work, use .commit()
+            prefEditor.apply();
         }
 
+        //Saved key-values
         round = sharedPref.getInt("round", 1);
         player1 = sharedPref.getInt("player1", 0);
         player2 = sharedPref.getInt("player2", 1);
         judge = sharedPref.getInt("judge", 2);
         stopTime = sharedPref.getLong("stoptime", 0);
-
-        prompt = generatePrompt();
-        entry1 = generateEntry();
-        entry2 = generateEntry();
+        prompt = sharedPref.getString("prompt", generatePrompt());
+        entry1 = sharedPref.getString("entry1", generateEntry());
+        entry2 = sharedPref.getString("entry2", generateEntry());
 
         //App bar setup
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar_game));
@@ -108,14 +106,16 @@ public class GameActivity extends AppCompatActivity {
         prefEditor.putInt("player1", player1);
         prefEditor.putInt("player2", player2);
         prefEditor.putInt("judge", judge);
-        prefEditor.putLong("stoptime", 0);
+        prefEditor.putLong("stoptime", stopTime);
+        prefEditor.putString("prompt", prompt);
+        prefEditor.putString("entry1", entry1);
+        prefEditor.putString("entry2", entry2);
         prefEditor.apply();
     }
 
     /* CUSTOM METHODS */
     //TODO: Confirmation dialog
     public void onButtonClick(View view) {
-        //Voting buttons
         switch(view.getId()) {
             case R.id.button_vote1:
                 //Give Player1 a point
@@ -135,6 +135,9 @@ public class GameActivity extends AppCompatActivity {
 
         //Setup next round
         if (view.getId() == R.id.button_vote1 || view.getId() == R.id.button_vote2) {
+            while (judge == player1 || judge == player2) {
+                judge = nextPlayer(judge);
+            }
             prompt = generatePrompt();
             entry1 = generateEntry();
             entry2 = generateEntry();
